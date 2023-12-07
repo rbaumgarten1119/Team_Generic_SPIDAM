@@ -1,53 +1,39 @@
-from tkinter import Tk, Label, Button
-from tkinter import ttk
+import tkinter as tk
 from tkinter import filedialog as fd
-from tkinter.messagebox import showinfo
-# from Model import Audio
+from os import path
+from Model import Audio
 from Controller import Controller
 
-gfile = ''
-root = Tk()
 
-root.title('Project-Scientific Python Interactive Data Acoustic Modeling')
-root.resizable(False, False)
-root.geometry('300x150')
+class View:
+    def __init__(self, controller):
+        self.controller = controller
 
+        self.root = tk.Tk()
 
-def select_file():
-    filetypes = (
-        ('wave files', '*.wav'),
-        ('mp3 files', '*.mp3'),
-        ('All files', '*.*')
-    )
+        self.root.title('Project-Scientific Python Interactive Data Acoustic Modeling')
+        self.root.resizable(False, False)
+        self.root.geometry('300x150')
 
-    filename = fd.askopenfilename(
-        title='Open a file',
-        initialdir='/',
-        filetypes=filetypes)
+        # GUI elements
+        self.load_button = tk.Button(self.root, text="Load Audio File", command=self.load_file)
+        self.load_button.pack()
 
-    if filetypes == ('mp3 files', '*.mp3'):
-        Controller.convert_audio()
+        self.file_label = tk.Label(self.root, text="")
+        self.file_label.pack()
 
-    gfile = filename
+        self.duration_label = tk.Label(self.root, text="")
+        self.duration_label.pack()
 
-    # tkinter.messagebox — Tkinter message prompts
-    showinfo(
-        title='Selected File',
-        message=filename
-    )
+        # Add more GUI elements for other functionalities
 
-    gfile_label = ttk.Label(root, text=gfile)
-    gfile_label.pack(side="bottom")
+    def load_file(self):
+        file_path = fd.askopenfilename(filetypes=[("Audio files", "*.wav")])
+        if file_path:
+            self.controller.load_audio_file(file_path)
+            self.file_label.config(text=f"File: {path.basename(file_path)}")
+            self.duration_label.config(text=f"Duration: {self.controller.get_duration()} seconds")
 
+    def run(self):
+        self.root.mainloop()
 
-# open button
-open_button = ttk.Button(
-    root,
-    text='Load audio file',
-    command=select_file
-)
-
-open_button.pack(expand=True)
-
-# run the application
-root.mainloop()
