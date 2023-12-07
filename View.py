@@ -2,11 +2,8 @@ from tkinter import Tk, Label, Button
 from tkinter import ttk
 from tkinter import filedialog as fd
 from tkinter.messagebox import showinfo
-from Model import Audio
-from os import path
-from pydub import AudioSegment
-from pydub.playback import play
-
+# from Model import Audio
+from Controller import Controller
 
 gfile = ''
 root = Tk()
@@ -14,9 +11,12 @@ root = Tk()
 root.title('Project-Scientific Python Interactive Data Acoustic Modeling')
 root.resizable(False, False)
 root.geometry('300x150')
+
+
 def select_file():
     filetypes = (
         ('wave files', '*.wav'),
+        ('mp3 files', '*.mp3'),
         ('All files', '*.*')
     )
 
@@ -24,6 +24,9 @@ def select_file():
         title='Open a file',
         initialdir='/',
         filetypes=filetypes)
+
+    if filetypes == ('mp3 files', '*.mp3'):
+        Controller.convert_audio()
 
     gfile = filename
 
@@ -45,7 +48,6 @@ open_button = ttk.Button(
 )
 
 open_button.pack(expand=True)
-
 
 # run the application
 root.mainloop()
