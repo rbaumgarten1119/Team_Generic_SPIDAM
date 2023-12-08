@@ -1,20 +1,15 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.io import wavfile
 from scipy import fft
 from os import path
 from pydub import AudioSegment
 from pydub.exceptions import CouldntDecodeError
-from pydub.playback import play
 from scipy.io import wavfile
+from scipy import signal
 import numpy as np
-
-sample_rate, data = wavfile.read("16bitlchan.wav")
-spectrum, freqs, t, im = plt.specgram(data, Fs=sample_rate, NFFT=1024, cmap=plt.get_cmap('autumn_r'))
+from scipy.signal import find_peaks
 
 
 class Audio:
-    def __int__(self):
+    def __init__(self):
         self.filename = None
         self.sample_rate = None
         self.audio_data = None
@@ -66,66 +61,71 @@ class Audio:
         self.resonance_freq = positive_frequencies[max_amplitude_index]
 
     def calculate_rt60(self):  # compute RT60 for low, mid, and high frequencies
-        find_target_frequency(freqs)
-        # find an index of a max value
-        data_in_db = frequency_check()
-        index_of_max = np.argmax(data_in_db)
-        value_of_max = data_in_db[index_of_max]
-        sliced_array = data_in_db[index_of_max:]
-        value_of_max_less_5 = value_of_max - 5
-        value_of_max_less_5 = find_nearest_value(sliced_array, value_of_max_less_5)
-        index_of_max_less_5 = np.where(data_in_db == value_of_max_less_5)
-        # slice array from a max -5dB
-        value_of_max_less_25 = value_of_max - 25
-        value_of_max_less_25 = find_nearest_value(sliced_array, value_of_max_less_25)
-        index_of_max_less_25 = np.where(data_in_db == value_of_max_less_25)
-        plt.plot(t[index_of_max_less_25], data_in_db[index_of_max_less_25], 'ro')
-        rt20 = (t[index_of_max_less_5] - t[index_of_max_less_25])[0]
-        # extrapolate rt20 to rt60
-        rt60 = 3 * rt20
-        # optional set limits on plot
-        # plt.xlim(0, ((round(abs(rt60), 2)) * 1.5))
-        plt.grid()  # show grid
-        plt.show()  # show plots
-        print(f'The RT60 reverb time is {round(abs(rt60), 2)} seconds')
+        # Split the frequency range into low, mid, and high bands (adjust as needed)
+        low_cutoff = 100  # Adjust as needed
+        high_cutoff = 1000  # Adjust as needed
 
+        # Find the indices corresponding to the frequency bands
+        low_band_index = np.where((self.audio_data >= 0) & (self.audio_data < low_cutoff))[0]
+        mid_band_index = np.where((self.audio_data >= low_cutoff) & (self.audio_data < high_cutoff))[0]
+        high_band_index = np.where(self.audio_data >= high_cutoff)[0]
+
+        # Calculate RT60 for each frequency band
+        self.rt60_low = self._calculate_rt60_for_range(low_band_index)
+        self.rt60_mid = self._calculate_rt60_for_range(mid_band_index)
+        self.rt60_high = self._calculate_rt60_for_range(high_band_index)
+
+    def _calculate_rt60_for_range(self, frequency_index):
+        # Calculate the energy envelope
+        energy_envelope = np.abs(np.imag(signal.hilbert(self.audio_data)))
+
+        # Extract the energy envelope for the specified frequency range
+        fRange = energy_envelope[frequency_index]
+
+        # Find the peaks in the envelope
+        peaks, _ = find_peaks(fRange)
+
+        # Measure the time between the first and last peaks where the envelope exceeds a threshold (e.g., -60 dB)
+        threshold_db = -60
+        threshold_amplitude = 10 ** (threshold_db / 20)
+        envelope_thresholded = fRange > threshold_amplitude
+
+        # Find the first and last indices where the envelope exceeds the threshold
+        first_peak = np.argmax(envelope_thresholded)
+        last_peak = len(envelope_thresholded) - np.argmax(envelope_thresholded[::-1])
+
+        # Calculate the time between the first and last peaks
+        rt60 = (last_peak - first_peak) / self.sample_rate
+
+        return rt60
 
 # REFERENCES TO POWERPOINTS
 # # sample_rate, data = wavfile.read("16bitlchan.wav")
 # # spectrum, freqs, t, im = plt.specgram(data, Fs=sample_rate, NFFT=1024, cmap=plt.get_cmap('autumn_r'))
 #
 # # prints var outputs
-def debug(fstring):
-    print(fstring)  # comment out for prod
-
-
-#
+# def debug(fstring):
+#     print(fstring)  # comment out for prod
 #
 # # pass
-def find_target_frequency(freqs):
-    for x in freqs:
-        if x > 1000:
-            break
-    return x
-
-
+# def find_target_frequency(freqs):
+#     for x in freqs:
+#         if x > 1000:
+#             break
+#     return x
 #
-#
-def frequency_check():
-    # you can choose a frequency which you want to check
-    debug(f'freqs {freqs[:10]}]')
-    target_frequency = find_target_frequency(freqs)
-    debug(f'target_frequency {target_frequency}')
-    index_of_frequency = np.where(freqs == target_frequency)[0][0]
-    debug(f'index_of_frequncy {index_of_frequency}')  # find a sound data for a particular frequency
-    data_for_frequency = spectrum[index_of_frequency]
-    debug(f'data_for_frequency {data_for_frequency[:10]}')
-    # change a digital signal for a values in decibels
-    data_in_db_fun = 10 * np.log10(data_for_frequency)
-    return data_in_db_fun
-
-
-#
+# def frequency_check():
+#     # you can choose a frequency which you want to check
+#     debug(f'freqs {freqs[:10]}]')
+#     target_frequency = find_target_frequency(freqs)
+#     debug(f'target_frequency {target_frequency}')
+#     index_of_frequency = np.where(freqs == target_frequency)[0][0]
+#     debug(f'index_of_frequncy {index_of_frequency}')  # find a sound data for a particular frequency
+#     data_for_frequency = spectrum[index_of_frequency]
+#     debug(f'data_for_frequency {data_for_frequency[:10]}')
+#     # change a digital signal for a values in decibels
+#     data_in_db_fun = 10 * np.log10(data_for_frequency)
+#     return data_in_db_fun
 #
 # data_in_db = frequency_check()
 # plt.figure()
@@ -141,17 +141,15 @@ def frequency_check():
 # sliced_array = data_in_db[index_of_max:]
 # value_of_max_less_5 = value_of_max - 5
 #
-#
 # # find a nearest value
-def find_nearest_value(array, value):
-    array = np.asarray(array)
-
-    debug(f'array {array[:10]}')
-    idx = (np.abs(array - value)).argmin()
-    debug(f'idx {idx}')
-    debug(f'array[idx] {array[idx]}')
-    return array[idx]
+# def find_nearest_value(array, value):
+#     array = np.asarray(array)
 #
+#     debug(f'array {array[:10]}')
+#     idx = (np.abs(array - value)).argmin()
+#     debug(f'idx {idx}')
+#     debug(f'array[idx] {array[idx]}')
+#     return array[idx]
 #
 # value_of_max_less_5 = find_nearest_value(sliced_array, value_of_max_less_5)
 # index_of_max_less_5 = np.where(data_in_db == value_of_max_less_5)
@@ -170,7 +168,6 @@ def find_nearest_value(array, value):
 # plt.show()  # show plots
 # print(f'The RT60 reverb time is {round(abs(rt60), 2)} seconds')
 #
-#
 # data_in_db = frequency_check()
 # plt.figure(2)
 # plt.plot(t, data_in_db, linewidth=1, alpha=0.7, color='#004bc6')
@@ -184,13 +181,11 @@ def find_nearest_value(array, value):
 # sliced_array = data_in_db[index_of_max:]
 # value_of_max_less_5 = value_of_max - 5
 #
-#
 # # find a nearest value of less 5db
 # def find_nearest_value(array, value):
 #     array = np.asarray(array)
 #     idx = (np.abs(array - value)).argmin()
 #     return array[idx]
-#
 #
 # value_of_max_less_5 = find_nearest_value(sliced_array, value_of_max_less_5)
 # index_of_max_less_5 = np.where(data_in_db == value_of_max_less_5)
