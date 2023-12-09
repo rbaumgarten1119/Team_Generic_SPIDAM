@@ -18,11 +18,18 @@ class Audio:
         self.rt60_low = None
         self.rt60_mid = None
         self.rt60_high = None
+        self.frequency_low_values = None
+        self.frequency_mid_values = None
+        self.frequency_high_values = None
+        self.audioLength = None
 
     def load_audio_file(self, filename):
         self.filename = filename
         self.sample_rate, self.audio_data = wavfile.read(filename)
         self.duration = len(self.audio_data) / self.sample_rate
+        self.calculate_rt60()
+        self.getEntireFrequency()
+        self.getLengthArray()
 
     def convert_to_wav(self):
         if self.filename.lower().endswith(".wav"):
@@ -98,6 +105,20 @@ class Audio:
         rt60 = (last_peak - first_peak) / self.sample_rate
 
         return rt60
+
+
+    # These two functions were to mainly test things, I imagine the "calculate_resonance_freq" function will have much more use than these.
+
+    def getEntireFrequency(self):
+        fft_result = fft.fft(self.audio_data)
+        frequencies = fft.fftfreq(len(fft_result), 1.0 / self.sample_rate)
+
+        self.frequency_low_values = frequencies
+
+    def getLengthArray(self):
+        self.audioLength = list(range(0, len(self.audio_data)))
+
+
 
 # REFERENCES TO POWERPOINTS
 # # sample_rate, data = wavfile.read("16bitlchan.wav")

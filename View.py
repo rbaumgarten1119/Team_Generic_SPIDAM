@@ -54,7 +54,7 @@ class View:
         self.ax.clear()
         self.ax.plot(frequency_band, rt60_values, label=f"RT60 for {self.controller.get_current_band()} band")
         self.ax.set_xlabel("Frequency (Hz)")
-        self.ax.set_ylabel("RT60 (s)")
+        self.ax.set_ylabel("Amplitude(dB) ?")
         self.ax.legend()
         self.canvas.draw()
 
