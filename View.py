@@ -35,8 +35,9 @@ class View:
         self.canvas.get_tk_widget().pack()
 
     def load_file(self):
-        file_path = fd.askopenfilename(filetypes=[("Audio files", "*.wav")])
+        file_path = fd.askopenfilename(filetypes=[("Audio files", "")])
         if file_path:
+            print(file_path)
             self.controller.load_audio_file(file_path)
             self.file_label.config(text=f"File: {path.basename(file_path)}")
             self.duration_label.config(text=f"Duration: {self.controller.get_duration()} seconds")

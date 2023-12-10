@@ -25,22 +25,23 @@ class Audio:
         self.audioLength = None
 
     def load_audio_file(self, filename):
-        self.filename = filename
-        self.sample_rate, self.audio_data = wavfile.read(filename)
+        self.convert_to_wav(filename)
         self.duration = len(self.audio_data) / self.sample_rate
         self.calculate_rt60()
         self.getEntireFrequency()
         self.getLengthArray()
 
-    def convert_to_wav(self):
-        if self.filename.lower().endswith(".wav"):
+    def convert_to_wav(self, filename):
+        if filename.lower().endswith(".wav"):
             # Already a WAV file, no need to convert
+            self.filename = filename
+            self.sample_rate, self.audio_data = wavfile.read(filename)
             return
 
         try:
-            audio = AudioSegment.from_file(self.filename)
+            audio = AudioSegment.from_file(filename)
             # Convert to WAV format
-            wav_filename = path.splitext(self.filename)[0] + ".wav"
+            wav_filename = path.splitext(filename)[0] + ".wav"
             audio.export(wav_filename, format="wav")
             self.filename = wav_filename
             self.sample_rate, self.audio_data = wavfile.read(wav_filename)
