@@ -74,9 +74,9 @@ class Audio:
         high_cutoff = 5000  # Adjust as needed
 
         # Find the indices corresponding to the frequency ranges
-        low_band_index = np.where((self.audio_data >= 0) & (self.audio_data < low_cutoff))[0]
-        mid_band_index = np.where((self.audio_data >= low_cutoff) & (self.audio_data < high_cutoff))[0]
-        high_band_index = np.where(self.audio_data >= high_cutoff)[0]
+        low_band_index = [60000, 250000]
+        mid_band_index = [0, 1000]
+        high_band_index = [5000, 10000]
 
         # Calculate RT60 for each frequency range
         self.rt60_low = self._calculate_rt60_for_range(low_band_index)
@@ -108,7 +108,7 @@ class Audio:
 
         spectrum, freqs, t, im = plt.specgram(self.audio_data, Fs=self.sample_rate, NFFT=1024, cmap=plt.get_cmap('autumn_r'))
 
-        data_in_db = frequency_check()
+        data_in_db = frequency_check(freqs, spectrum, frequency_index)
         plt.figure()
         # plot reverb time on grid
         plt.plot(t, data_in_db, linewidth=1, alpha=0.7, color='#004bc6')
@@ -159,17 +159,17 @@ class Audio:
 # spectrum, freqs, t, im = plt.specgram(audio_data, Fs=sample_rate, NFFT=1024, cmap=plt.get_cmap('autumn_r'))
 
 # pass
-def find_target_frequency(freqs):
+def find_target_frequency(freqs, target):
     for x in freqs:
-        if x > 1000:
+        if (x > target[0]) and (x < target[1]):
             break
     return x
 
-def frequency_check(freqs, spectrum):
+def frequency_check(freqs, spectrum, target_frequency_type):
 # you can choose a frequency which you want to check
     f'freqs {freqs[:10]}]'
     global target_frequency
-    target_frequency = find_target_frequency(freqs)
+    target_frequency = find_target_frequency(freqs, target_frequency_type)
     f'target_frequency {target_frequency}'
     index_of_frequency = np.where(freqs == target_frequency)[0][0]
     f'index_of_frequncy {index_of_frequency}'  # find a sound data for a particular frequency
@@ -210,8 +210,8 @@ def frequency_check(freqs, spectrum):
 # plt.show()  # show plots
 # print(f'The RT60 reverb time is {round(abs(rt60), 2)} seconds')
 
-data_in_db = frequency_check()
-plt.figure(2)
+#data_in_db = frequency_check()
+#plt.figure(2)
 
 # find nearest value of less 5db
 def find_nearest_value(array, value):
