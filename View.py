@@ -1,4 +1,5 @@
 import tkinter as tk
+import numpy as np
 from tkinter import filedialog as fd
 from os import path
 from matplotlib import pyplot as plt
@@ -58,6 +59,9 @@ class View:
         elif (self.controller.get_current_band() == "Wave"):
             self.plot_wave_waveform()
             return
+        elif (self.controller.get_current_band() == "Orange"):
+            self.plot_orange_waveform()
+            return
 
         time, data, color = self.controller.get_current_plot_data()
         self.ax.clear()
@@ -108,6 +112,38 @@ class View:
         self.ax.legend()
         self.canvas.draw()
 
+    def plot_orange_waveform(self):
+        audio_data, sample_rate, data_in_db = self.controller.get_orange_plot_data()
+        data_in_db = data_in_db[1]
+        self.ax.clear()
+
+        spectrum, freqs, t, im = plt.specgram(audio_data, Fs=sample_rate, NFFT=1024,
+                                              cmap=plt.get_cmap('autumn_r'))
+
+        index_of_max = np.argmax(data_in_db)
+        value_of_max = data_in_db[index_of_max]
+        plt.plot(t[index_of_max], data_in_db[index_of_max], 'go')
+        # slice array from a max value
+        sliced_array = data_in_db[index_of_max:]
+        value_of_max_less_5 = value_of_max - 5
+        value_of_max_less_5 = find_nearest_value(sliced_array, value_of_max_less_5)
+        index_of_max_less_5 = np.where(data_in_db == value_of_max_less_5)
+        plt.plot(t[index_of_max_less_5], data_in_db[index_of_max_less_5], 'yo')
+        # slice array from a max -5dB
+        value_of_max_less_25 = value_of_max - 25
+        value_of_max_less_25 = find_nearest_value(sliced_array, value_of_max_less_25)
+        index_of_max_less_25 = np.where(data_in_db == value_of_max_less_25)
+        plt.plot(t[index_of_max_less_25], data_in_db[index_of_max_less_25], 'ro')
+
+        self.ax.set_xlabel("Time (s)")
+        self.ax.set_ylabel("Power (dB)")
+
+        self.canvas.draw()
     def run(self):
         self.root.mainloop()
+
+def find_nearest_value(array, value):
+    array = np.asarray(array)
+    idx = (np.abs(array - value)).argmin()
+    return array[idx]
 

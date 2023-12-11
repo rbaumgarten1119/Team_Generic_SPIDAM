@@ -31,6 +31,8 @@ class Controller:
             self.current_range = "All"
         elif self.current_range == "All":
             self.current_range = "Wave"
+        elif self.current_range == "Wave":
+            self.current_range = "Orange"
         else:
             self.current_range = "Low"
 
@@ -44,6 +46,9 @@ class Controller:
 
         # return self.model.audio_data, self.frequency_ranges[self.current_range]
 
+        if (self.current_range == "Orange"):
+            return self.frequency_ranges["Mid"]
+
         time, data = self.frequency_ranges[self.current_range]
         return time, data, self.color_dict[self.current_range]
 
@@ -55,6 +60,9 @@ class Controller:
         time = np.linspace(0, self.model.duration, self.model.audio_data.shape[0])
         return time, self.model.audio_data
 
+    def get_orange_plot_data(self):
+        data_in_db = self.get_current_plot_data()
+        return self.model.audio_data, self.model.sample_rate, data_in_db
 
 if __name__ == "__main__":
     model = Audio()
