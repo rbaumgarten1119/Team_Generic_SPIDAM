@@ -51,12 +51,20 @@ class View:
 
     def plot_waveform(self):
         # Plot waveform based on the current frequency band
-        time, data = self.controller.get_current_plot_data()
+        if (self.controller.get_current_band() == "All"):
+            #print("Here")
+            self.plot_all_waveform()
+            return
+        elif (self.controller.get_current_band() == "Wave"):
+            self.plot_wave_waveform()
+            return
+
+        time, data, color = self.controller.get_current_plot_data()
         self.ax.clear()
 
         #self.ax.plot(frequency_band, rt60_values, label=f"RT60 for {self.controller.get_current_band()} band")
 
-        self.ax.plot(time, data, label=f"RT60 for {self.controller.get_current_band()} band", color='#004bc6')
+        self.ax.plot(time, data, label=f"RT60 for {self.controller.get_current_band()} band", color=color)
 
         self.ax.set_xlabel("Time (s)")
         self.ax.set_ylabel("Power (dB)")
@@ -65,6 +73,39 @@ class View:
         #newPlot.show()
 
         #self.ax = newPlot
+        self.canvas.draw()
+
+    def plot_all_waveform(self):
+        data_dict, color_dict = self.controller.get_all_plot_data()
+        lowTime, lowData = data_dict["Low"]
+        midTime, midData = data_dict["Mid"]
+        highTime, highData = data_dict["High"]
+
+        lowColor = color_dict["Low"]
+        midColor = color_dict["Mid"]
+        highColor = color_dict["High"]
+
+        self.ax.clear()
+
+        self.ax.plot(lowTime, lowData, label=f"RT60 for Low band", color=lowColor)
+        self.ax.plot(midTime, midData, label=f"RT60 for Mid band", color=midColor)
+        self.ax.plot(highTime, highData, label=f"RT60 for High band", color=highColor)
+
+        self.ax.set_xlabel("Time (s)")
+        self.ax.set_ylabel("Power (dB)")
+        self.ax.legend()
+        self.canvas.draw()
+
+    def plot_wave_waveform(self):
+        time, wave_data = self.controller.get_wave_plot_data()
+
+        self.ax.clear()
+
+        self.ax.plot(time, wave_data, label=f"Waveform of the Audio", color='purple')
+
+        self.ax.set_xlabel("Time (s)")
+        self.ax.set_ylabel("Amplitude (metres)")
+        self.ax.legend()
         self.canvas.draw()
 
     def run(self):

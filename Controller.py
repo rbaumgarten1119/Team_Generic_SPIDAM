@@ -1,8 +1,10 @@
 # from os import path
 # from pydub import AudioSegment
 # from pydub.playback import play
+import numpy as np
 from Model import Audio
 from View import View
+
 
 
 class Controller:
@@ -11,6 +13,7 @@ class Controller:
         # Track the current frequency ranges (initially set to Low)
         self.current_range = "Low"
         self.frequency_ranges = {"Low": self.model.rt60_low, "Mid": self.model.rt60_mid, "High": self.model.rt60_high}
+        self.color_dict = {"Low": 'green', "Mid": 'blue', "High": 'red'}
 
     def load_audio_file(self, filename):
         self.model.load_audio_file(filename)
@@ -24,6 +27,10 @@ class Controller:
             self.current_range = "Mid"
         elif self.current_range == "Mid":
             self.current_range = "High"
+        elif self.current_range == "High":
+            self.current_range = "All"
+        elif self.current_range == "All":
+            self.current_range = "Wave"
         else:
             self.current_range = "Low"
 
@@ -37,10 +44,16 @@ class Controller:
 
         # return self.model.audio_data, self.frequency_ranges[self.current_range]
 
-        return self.frequency_ranges[self.current_range]
+        time, data = self.frequency_ranges[self.current_range]
+        return time, data, self.color_dict[self.current_range]
 
-    def get_test_plot_data(self):
-        return self.model.rt60_low
+    def get_all_plot_data(self):
+        self.frequency_ranges = {"Low": self.model.rt60_low, "Mid": self.model.rt60_mid, "High": self.model.rt60_high}
+        return self.frequency_ranges, self.color_dict
+
+    def get_wave_plot_data(self):
+        time = np.linspace(0, self.model.duration, self.model.audio_data.shape[0])
+        return time, self.model.audio_data
 
 
 if __name__ == "__main__":
