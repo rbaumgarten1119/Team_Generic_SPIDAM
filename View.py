@@ -14,7 +14,7 @@ class View:
 
         self.root.title('Project-Scientific Python Interactive Data Acoustic Modeling')
         self.root.resizable(False, False)
-        self.root.geometry('800x600')
+        self.root.geometry('700x600')
 
         # GUI elements
         self.load_button = tk.Button(self.root, text="Load Audio File", command=self.load_file)

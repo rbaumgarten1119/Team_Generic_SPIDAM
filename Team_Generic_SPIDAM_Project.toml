@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "Project-Scientific_Python_Interactive_Data_Acoustic_Modeling"
+name = "Team_Generic_SPIDAM"
 version = "0.0.1"
 authors = [
   { name="Robert Baumgarten", email="rbaumgarten3422@floridapoly.edu" },
@@ -19,5 +19,5 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/pypa/sampleproject"
-Issues = "https://github.com/pypa/sampleproject/issues"
+Homepage = "https://github.com/rbaumgarten1119/Team_Generic_SPIDAM"
+Issues = "https://github.com/rbaumgarten1119/Team_Generic_SPIDAM/issues"
