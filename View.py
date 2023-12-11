@@ -51,12 +51,20 @@ class View:
 
     def plot_waveform(self):
         # Plot waveform based on the current frequency band
-        frequency_band, rt60_values = self.controller.get_current_plot_data()
+        time, data = self.controller.get_current_plot_data()
         self.ax.clear()
-        self.ax.plot(frequency_band, rt60_values, label=f"RT60 for {self.controller.get_current_band()} band")
-        self.ax.set_xlabel("Frequency (Hz)")
-        self.ax.set_ylabel("Amplitude(dB) ?")
+
+        #self.ax.plot(frequency_band, rt60_values, label=f"RT60 for {self.controller.get_current_band()} band")
+
+        self.ax.plot(time, data, label=f"RT60 for {self.controller.get_current_band()} band", color='#004bc6')
+
+        self.ax.set_xlabel("Time (s)")
+        self.ax.set_ylabel("Power (dB)")
         self.ax.legend()
+
+        #newPlot.show()
+
+        #self.ax = newPlot
         self.canvas.draw()
 
     def run(self):

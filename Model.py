@@ -1,3 +1,5 @@
+import os
+
 from matplotlib import pyplot as plt
 from scipy import fft
 from os import path
@@ -110,37 +112,48 @@ class Audio:
         spectrum, freqs, t, im = plt.specgram(self.audio_data, Fs=self.sample_rate, NFFT=1024, cmap=plt.get_cmap('autumn_r'))
 
         data_in_db = frequency_check(freqs, spectrum, frequency_index)
-        plt.figure()
+
         # plot reverb time on grid
         plt.plot(t, data_in_db, linewidth=1, alpha=0.7, color='#004bc6')
         plt.xlabel('Time (s)')
         plt.ylabel('Power (dB)')
+
         # find a index of a max value
         index_of_max = np.argmax(data_in_db)
         value_of_max = data_in_db[index_of_max]
-        plt.plot(t[index_of_max], data_in_db[index_of_max], 'go')
+        #plt.plot(t[index_of_max], data_in_db[index_of_max], 'go')
         # slice array from a max value
         sliced_array = data_in_db[index_of_max:]
         value_of_max_less_5 = value_of_max - 5
         value_of_max_less_5 = find_nearest_value(sliced_array, value_of_max_less_5)
         index_of_max_less_5 = np.where(data_in_db == value_of_max_less_5)
-        plt.plot(t[index_of_max_less_5], data_in_db[index_of_max_less_5], 'yo')
+        #plt.plot(t[index_of_max_less_5], data_in_db[index_of_max_less_5], 'yo')
         # slice array from a max -5dB
         value_of_max_less_25 = value_of_max - 25
         value_of_max_less_25 = find_nearest_value(sliced_array, value_of_max_less_25)
         index_of_max_less_25 = np.where(data_in_db == value_of_max_less_25)
-        plt.plot(t[index_of_max_less_25], data_in_db[index_of_max_less_25], 'ro')
+        #plt.plot(t[index_of_max_less_25], data_in_db[index_of_max_less_25], 'ro')
         rt20 = (t[index_of_max_less_5] - t[index_of_max_less_25])[0]
         # extrapolate rt20 to rt60
         rt60 = 3 * rt20
+
+        # if (frequency_index[0] == 60000):
+        #     plt.savefig('currentLowFreqPlot.png')
+        # elif (frequency_index[0]== 0):
+        #     plt.savefig('currentMidFreqPlot.png')
+        # elif (frequency_index[0] == 5000):
+        #     plt.savefig('currentHighFreqPlot.png')
+
         # optional set limits on plot
         # plt.xlim(0, ((round(abs(rt60), 2)) * 1.5))
-        plt.grid()  # show grid
-        plt.show()  # show plots
+        #plt.grid()  # show grid
+        #plt.show()  # show plots
+        # plt.figure()
+        # plt.show()
+
         print(f'The RT60 reverb time at freq {int(target_frequency)}Hz is {round(abs(rt60), 2)} seconds')
 
-        return rt60
-
+        return t, data_in_db
 
     # These two functions were to mainly test things, I imagine the "calculate_resonance_freq" function will have much more use than these.
 
@@ -153,7 +166,10 @@ class Audio:
     def getLengthArray(self):
         self.audioLength = list(range(0, len(self.audio_data)))
 
-
+    # def __del__(self):
+    #     os.remove('currentLowFreqPlot.png')
+    #     os.remove('currentMidFreqPlot.png')
+    #     os.remove('currentHighFreqPlot.png')
 
 # REFERENCES TO POWERPOINTS
 # sample_rate, data = wavfile.read("16bitlchan.wav")
@@ -235,3 +251,6 @@ def find_nearest_value(array, value):
 # plt.grid()
 # plt.show()
 # print(f'The RT60 reverb time at freq {int(target_frequency)}Hz is {round(abs(rt60), 2)} seconds')
+
+
+

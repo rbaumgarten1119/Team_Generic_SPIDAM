@@ -32,13 +32,16 @@ class Controller:
 
     def get_current_plot_data(self):
         self.frequency_ranges = {"Low": self.model.rt60_low, "Mid": self.model.rt60_mid, "High": self.model.rt60_high}
-
         # print(self.model.audio_data)
         # print(self.frequency_ranges[self.current_range])
 
         # return self.model.audio_data, self.frequency_ranges[self.current_range]
 
-        return self.model.frequency_low_values, self.model.audio_data
+        return self.frequency_ranges[self.current_range]
+
+    def get_test_plot_data(self):
+        return self.model.rt60_low
+
 
 if __name__ == "__main__":
     model = Audio()
