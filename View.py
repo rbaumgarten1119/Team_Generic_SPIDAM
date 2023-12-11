@@ -14,7 +14,7 @@ class View:
 
         self.root.title('Project-Scientific Python Interactive Data Acoustic Modeling')
         self.root.resizable(False, False)
-        self.root.geometry('500x500')
+        self.root.geometry('500x600')
 
         # GUI elements
         self.load_button = tk.Button(self.root, text="Load Audio File", command=self.load_file)
@@ -25,6 +25,12 @@ class View:
 
         self.duration_label = tk.Label(self.root, text="")
         self.duration_label.pack()
+
+        self.resonance_label = tk.Label(self.root, text="")
+        self.resonance_label.pack()
+
+        self.rt60_diff_label = tk.Label(self.root, text="")
+        self.rt60_diff_label.pack()
 
         # Button to switch between Low, Mid, High plots
         self.switch_button = tk.Button(self.root, text="Switch Plot", command=self.switch_plot)
@@ -41,7 +47,11 @@ class View:
             print(file_path)
             self.controller.load_audio_file(file_path)
             self.file_label.config(text=f"File: {path.basename(file_path)}")
-            self.duration_label.config(text=f"Duration: {self.controller.get_duration()} seconds")
+            self.duration_label.config(text=f"Duration: {'{:.2f}'.format(self.controller.get_duration())} seconds")
+            self.resonance_label.config(text=f"Resonance Frequency: {'{:.2f}'.format(self.controller.get_resonance())} "
+                                             f"Hz")
+            self.rt60_diff_label.config(text=f"RT60 Difference: {'{:.2f}'.format(self.controller.get_rt60_diff())} "
+                                             f"seconds")
             # Plot initial waveform
             self.plot_waveform()
 

@@ -1,10 +1,6 @@
-# from os import path
-# from pydub import AudioSegment
-# from pydub.playback import play
 import numpy as np
 from Model import Audio
 from View import View
-
 
 
 class Controller:
@@ -20,6 +16,12 @@ class Controller:
 
     def get_duration(self):
         return self.model.duration
+
+    def get_resonance(self):
+        return self.model.calculate_resonance_freq()
+
+    def get_rt60_diff(self):
+        return self.model.rt60_difference()
 
     def switch_plot(self):
         # Switch between Low, Mid, High plots
@@ -63,6 +65,7 @@ class Controller:
     def get_orange_plot_data(self):
         data_in_db = self.get_current_plot_data()
         return self.model.audio_data, self.model.sample_rate, data_in_db
+
 
 if __name__ == "__main__":
     model = Audio()
